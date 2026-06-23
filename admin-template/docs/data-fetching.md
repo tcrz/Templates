@@ -63,11 +63,8 @@ One file per resource in `shared-queries/*.queries.ts`. Each file exports:
 
 1. A `*_QUERY_KEY` string constant (used as the cache key root).
 2. One or more `use*Query` hooks that call `useApiQuery`.
-3. Optionally, mutation hooks that call `useApiMutation` — but inline mutations
-   in the component are also fine for one-off actions.
 
-Mutations must invalidate the relevant query key on success so the list
-refreshes.
+**Do not put mutations in query files.** Mutations are always defined inline in the component that uses them.
 
 ### Example (`shared-queries/users.queries.ts`)
 
