@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import z from "zod";
 import { useState } from "react";
+import { APP_BRAND } from "@/constants/branding";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -128,8 +129,8 @@ export function ForgotPasswordForm() {
       <CardHeader className="items-center text-center">
         <div className="mb-6 animate-in fade-in zoom-in-95 duration-500">
           <Image
-            src="/logo.svg"
-            alt="Acme"
+            src={APP_BRAND.logo}
+            alt={APP_BRAND.name}
             width={60}
             height={60}
             priority

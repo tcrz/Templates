@@ -26,43 +26,43 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import z from "zod";
 import { passwordSchema } from "@/lib/schemas/auth";
+import { APP_BRAND } from "@/constants/branding";
 
-const setupAccountSchema = z
+const resetPasswordSchema = z
   .object({
-    email: z.string().email("Invalid email address"),
-    password: passwordSchema,
-    confirmPassword: z.string().min(1, "Please confirm your password"),
+    newPassword: passwordSchema,
+    confirmNewPassword: z.string().min(1, "Please confirm your password"),
   })
-  .refine((data) => data.password === data.confirmPassword, {
+  .refine((data) => data.newPassword === data.confirmNewPassword, {
     message: "Passwords do not match",
-    path: ["confirmPassword"],
+    path: ["confirmNewPassword"],
   });
 
-type SetupAccountFormData = z.infer<typeof setupAccountSchema>;
+type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 
-interface SetupAccountPayload {
-  token: string;
+interface ResetPasswordPayload {
   email: string;
-  password: string;
+  newPassword: string;
+  token: string;
 }
 
-export function SetupAccountForm() {
+export function ResetPasswordForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
-  const emailParam = searchParams.get("email");
+  const email = searchParams.get("email");
   const router = useRouter();
 
-  const mutation = useApiMutation<unknown, SetupAccountPayload>(
-    "/Auth/complete-setup",
+  const mutation = useApiMutation<unknown, ResetPasswordPayload>(
+    "/Auth/reset-password",
     {
       onSuccess: () => {
-        toast.success("Account created successfully! Please sign in.");
+        toast.success("Password reset successfully! Please sign in.");
         router.push("/auth/login");
       },
       onError: (error: any) => {
-        toast.error(error.message || "Failed to create account");
+        toast.error(error.message || "Failed to reset password");
       },
     }
   );
@@ -71,37 +71,78 @@ export function SetupAccountForm() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<SetupAccountFormData>({
-    resolver: zodResolver(setupAccountSchema),
+  } = useForm<ResetPasswordFormData>({
+    resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
-      email: emailParam || "",
-      password: "",
-      confirmPassword: "",
+      newPassword: "",
+      confirmNewPassword: "",
     },
   });
 
-  const onSubmit = async (data: SetupAccountFormData) => {
-    if (!token || !emailParam) {
-      toast.error("Invalid invitation link");
+  const onSubmit = async (data: ResetPasswordFormData) => {
+    if (!token || !email) {
+      toast.error("Invalid reset link");
       return;
     }
 
     await mutation.mutateAsync({
       data: {
+        email,
         token,
-        email: data.email,
-        password: data.password,
+        newPassword: data.newPassword,
       },
     });
   };
+
+  if (!token) {
+    return (
+      <Card className="p-6 w-full max-w-md border-sidebar !ring-0 !border-none animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <CardHeader className="items-center text-center">
+          <div className="mb-6 animate-in fade-in zoom-in-95 duration-500">
+            <Image
+              src="/logo.svg"
+              alt="Acme"
+              width={60}
+              height={60}
+              priority
+              className="mx-auto"
+            />
+          </div>
+          <CardTitle className="text-2xl tracking-tight animate-in fade-in slide-in-from-bottom-2 duration-500 delay-200">
+            Invalid Link
+          </CardTitle>
+          <CardDescription className="animate-in fade-in duration-500 delay-300">
+            This password reset link is invalid or has expired.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-400">
+            <Button
+              onClick={() => router.push("/auth/forgot-password")}
+              className="w-full"
+            >
+              Request New Link
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => router.push("/auth/login")}
+              className="w-full"
+            >
+              Back to Sign In
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="p-6 w-full max-w-md border-sidebar !ring-0 !border-none animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
       <CardHeader className="items-center text-center">
         <div className="mb-6 animate-in fade-in zoom-in-95 duration-500">
           <Image
-            src="/logo.svg"
-            alt="Acme"
+            src={APP_BRAND.logo}
+            alt={APP_BRAND.name}
             width={60}
             height={60}
             priority
@@ -109,44 +150,26 @@ export function SetupAccountForm() {
           />
         </div>
         <CardTitle className="text-2xl tracking-tight animate-in fade-in slide-in-from-bottom-2 duration-500 delay-200">
-          Set Up Your Account
+          Reset Your Password
         </CardTitle>
         <CardDescription className="animate-in fade-in duration-500 delay-300">
-          You&apos;ve been invited to join Acme Back Office. Create your
-          password to get started.
+          Enter a new password for{" "}
+          <span className="font-medium text-foreground">{email}</span>
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)}>
           <FieldGroup>
             <Field className="animate-in fade-in slide-in-from-left-2 duration-500 delay-300">
-              <FieldLabel htmlFor="email">Email</FieldLabel>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                {...register("email")}
-                disabled={mutation.isPending || !!emailParam}
-                aria-invalid={errors.email ? "true" : "false"}
-                className="transition-all duration-200 focus:scale-[1.01]"
-              />
-              {errors.email && (
-                <FieldError className="animate-in fade-in slide-in-from-top-1 duration-300">
-                  {errors.email.message}
-                </FieldError>
-              )}
-            </Field>
-
-            <Field className="animate-in fade-in slide-in-from-left-2 duration-500 delay-400">
-              <FieldLabel htmlFor="password">Password</FieldLabel>
+              <FieldLabel htmlFor="password">New Password</FieldLabel>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Create a password"
-                  {...register("password")}
+                  placeholder="Enter new password"
+                  {...register("newPassword")}
                   disabled={mutation.isPending}
-                  aria-invalid={errors.password ? "true" : "false"}
+                  aria-invalid={errors.newPassword ? "true" : "false"}
                   className="transition-all duration-200 focus:scale-[1.01] pr-10"
                 />
                 <button
@@ -162,23 +185,23 @@ export function SetupAccountForm() {
                   )}
                 </button>
               </div>
-              {errors.password && (
+              {errors.newPassword && (
                 <FieldError className="animate-in fade-in slide-in-from-top-1 duration-300">
-                  {errors.password.message}
+                  {errors.newPassword.message}
                 </FieldError>
               )}
             </Field>
 
-            <Field className="animate-in fade-in slide-in-from-left-2 duration-500 delay-500">
+            <Field className="animate-in fade-in slide-in-from-left-2 duration-500 delay-400">
               <FieldLabel htmlFor="confirmPassword">Confirm Password</FieldLabel>
               <div className="relative">
                 <Input
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Confirm your password"
-                  {...register("confirmPassword")}
+                  placeholder="Confirm new password"
+                  {...register("confirmNewPassword")}
                   disabled={mutation.isPending}
-                  aria-invalid={errors.confirmPassword ? "true" : "false"}
+                  aria-invalid={errors.confirmNewPassword ? "true" : "false"}
                   className="transition-all duration-200 focus:scale-[1.01] pr-10"
                 />
                 <button
@@ -194,35 +217,32 @@ export function SetupAccountForm() {
                   )}
                 </button>
               </div>
-              {errors.confirmPassword && (
+              {errors.confirmNewPassword && (
                 <FieldError className="animate-in fade-in slide-in-from-top-1 duration-300">
-                  {errors.confirmPassword.message}
+                  {errors.confirmNewPassword.message}
                 </FieldError>
               )}
             </Field>
 
             <Field
               orientation="horizontal"
-              className="pt-4 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-700"
+              className="pt-4 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-600"
             >
               <Button
                 type="submit"
                 loading={mutation.isPending}
                 className="w-full transition-all duration-200 disabled:opacity-70"
               >
-                Create Account
+                Reset Password
               </Button>
             </Field>
 
             <div className="text-center text-sm pt-2 animate-in fade-in duration-500 delay-700">
-              <span className="text-muted-foreground">
-                Already have an account?{" "}
-              </span>
               <Link
                 href="/auth/login"
-                className="text-primary hover:underline transition-colors"
+                className="text-muted-foreground hover:text-foreground transition-colors"
               >
-                Sign in
+                Back to Sign In
               </Link>
             </div>
           </FieldGroup>

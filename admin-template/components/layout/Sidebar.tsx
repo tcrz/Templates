@@ -32,6 +32,7 @@ import {
 } from "@/constants"
 import { SidebarMenuSkeleton } from "@/components/layout/sidebar-menu-skeleton"
 import { cn } from "@/lib/utils"
+import { APP_BRAND } from "@/constants/branding"
 
 /**
  * Determines if a pathname matches a route URL, including nested routes.
@@ -208,17 +209,17 @@ export function SidebarComponent() {
       <SidebarHeader className="px-5 py-4 bg-sidebar/70 border-b border-gray-800">
         <Link href={ROUTES.HOME} className="flex items-center gap-6">
           <img
-            src="/logo.svg"
-            alt="Logo"
+            src={APP_BRAND.logo}
+            alt={APP_BRAND.name}
             width={32}
             height={32}
             className="object-contain flex-shrink-0"
           />
           <div className="flex flex-col">
             <span className="font-bold text-white text-xl">
-              ADMIN <span className="text-primary">OPS</span>
+              {APP_BRAND.name}
             </span>
-            <span className="text-xs text-primary/70">Control Center</span>
+            <span className="text-xs text-primary/70">{APP_BRAND.tagline}</span>
           </div>
         </Link>
       </SidebarHeader>

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { APP_BRAND } from "@/constants/branding";
 
 interface AuthLayoutProps {
   title?: string;
@@ -12,7 +13,7 @@ interface AuthLayoutProps {
   bgImage?: string;
 }
 
-export function AuthLayout({ title="Admin Back Office", children, contentClassName, bgImage }: AuthLayoutProps) {
+export function AuthLayout({ title=APP_BRAND.description, children, contentClassName, bgImage }: AuthLayoutProps) {
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Left Panel - Hero Section */}
