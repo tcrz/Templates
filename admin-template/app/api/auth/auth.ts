@@ -24,6 +24,17 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
+        // Dev bypass: accept any credentials without a backend
+        if (process.env.NODE_ENV === "development") {
+          const userDetails: UserDetails = {
+            email: credentials.email,
+            token: "dev-token",
+            role: "Admin",
+            fullName: "Dev User",
+          };
+          return userDetails as User;
+        }
+
         try {
           const response = await createApiClient<LoginData>("/Auth/login", {
             method: "POST",
@@ -32,8 +43,6 @@ export const authOptions: NextAuthOptions = {
               password: credentials.password,
             },
           });
-          console.log("credentials", credentials);
-          console.log("Login response:", response);
 
           if (!response.success || !response.data) {
             console.error("Login failed:", response.message);

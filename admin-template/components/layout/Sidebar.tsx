@@ -34,27 +34,18 @@ import { SidebarMenuSkeleton } from "@/components/layout/sidebar-menu-skeleton"
 import { cn } from "@/lib/utils"
 import { APP_BRAND } from "@/constants/branding"
 
-/**
- * Determines if a pathname matches a route URL, including nested routes.
- */
 function isRouteActive(pathname: string, routeUrl: string): boolean {
   if (routeUrl === "/") return pathname === routeUrl
   return pathname.startsWith(routeUrl)
 }
 
-/**
- * Check if any item in a group is active
- */
 function isGroupActive(pathname: string, items: SidebarMenuConfig[]): boolean {
   return items.some((item) => isRouteActive(pathname, item.url))
 }
 
-/**
- * Render a standalone menu item (not in a group)
- */
 function StandaloneMenuItem({ item, pathname, isSidebarDisabled }: { item: SidebarMenuConfig; pathname: string; isSidebarDisabled: boolean }) {
   const isActive = isRouteActive(pathname, item.url)
-  
+
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
@@ -62,37 +53,32 @@ function StandaloneMenuItem({ item, pathname, isSidebarDisabled }: { item: Sideb
         isActive={isActive}
         disabled={isSidebarDisabled}
         tooltip={item.description || item.title}
-        className={`group relative transition-all h-9.5 rounded-lg ${
+        className={cn(
+          "group relative transition-all h-9.5 rounded-lg",
           isActive
-            ? "!bg-primary !text-white hover:!bg-primary"
-            : "bg-transparent hover:bg-white/10 text-sidebar-foreground"
-        }`}
+            ? "!bg-primary !text-primary-foreground hover:!bg-primary"
+            : "bg-transparent hover:bg-sidebar-accent text-sidebar-foreground"
+        )}
         data-active={isActive}
       >
         <Link href={item.url} className="relative flex min-w-0 items-center w-full px-3 py-0">
           <div className="flex min-w-0 items-center gap-3">
-            <div className={`flex shrink-0 items-center justify-center ${
-              isActive ? "text-white" : "text-sidebar-foreground"
-            }`}>
-              <item.icon
-                strokeWidth={isActive ? 2.5 : 2}
-                className={`size-5 ${isActive ? "text-white" : "text-sidebar-foreground"}`}
-              />
+            <div className={cn("flex shrink-0 items-center justify-center", isActive ? "text-primary-foreground" : "text-sidebar-foreground")}>
+              <item.icon strokeWidth={isActive ? 2.5 : 2} className="size-5" />
             </div>
-            <span className={`truncate text-sm ${
-              isActive ? "text-white font-semibold" : "text-sidebar-foreground"
-            }`}>
+            <span className={cn("truncate text-sm", isActive ? "text-primary-foreground font-semibold" : "text-sidebar-foreground")}>
               {item.title}
             </span>
           </div>
           {item.badge && (
             <Badge
               variant="secondary"
-              className={`ml-auto h-5 min-w-5 px-1.5 text-[10px] font-semibold border-0 ${
+              className={cn(
+                "ml-auto h-5 min-w-5 px-1.5 text-[10px] font-semibold border-0",
                 isActive
-                  ? "bg-white/20 text-white"
-                  : "bg-white/10 text-sidebar-foreground"
-              }`}
+                  ? "bg-primary-foreground/20 text-primary-foreground"
+                  : "bg-sidebar-accent text-sidebar-foreground"
+              )}
             >
               {item.badge}
             </Badge>
@@ -109,7 +95,6 @@ interface CollapsibleSidebarGroupProps {
 }
 
 function CollapsibleSidebarGroup({ group, pathname }: CollapsibleSidebarGroupProps) {
-  // Type guard: ensure items exist
   if (!group.items || group.items.length === 0) {
     return null;
   }
@@ -126,7 +111,7 @@ function CollapsibleSidebarGroup({ group, pathname }: CollapsibleSidebarGroupPro
       <SidebarGroup>
         <SidebarGroupLabel
           asChild
-          className="group/label text-sidebar-foreground/60 hover:bg-white/10 hover:text-sidebar-foreground/80 text-xs font-semibold uppercase tracking-wider px-3 py-2"
+          className="group/label text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground/80 text-xs font-semibold uppercase tracking-wider px-3 py-2"
         >
           <CollapsibleTrigger className="flex w-full items-center gap-1 justify-between">
             <Tooltip>
@@ -149,37 +134,32 @@ function CollapsibleSidebarGroup({ group, pathname }: CollapsibleSidebarGroupPro
                       asChild
                       isActive={isActive}
                       tooltip={item.description || item.title}
-                      className={`group relative transition-all h-9.5 rounded-lg ${
+                      className={cn(
+                        "group relative transition-all h-9.5 rounded-lg",
                         isActive
-                          ? "!bg-primary !text-white hover:!bg-primary"
-                          : "bg-transparent hover:bg-white/10 text-sidebar-foreground"
-                      }`}
+                          ? "!bg-primary !text-primary-foreground hover:!bg-primary"
+                          : "bg-transparent hover:bg-sidebar-accent text-sidebar-foreground"
+                      )}
                       data-active={isActive}
                     >
                       <Link href={item.url} className="relative flex min-w-0 items-center w-full px-3 py-1">
                         <div className="flex min-w-0 items-center gap-3">
-                          <div className={`flex shrink-0 items-center justify-center ${
-                            isActive ? "text-white" : "text-sidebar-foreground"
-                          }`}>
-                            <item.icon
-                              strokeWidth={isActive ? 2.5 : 2}
-                              className={`size-5 ${isActive ? "text-white" : "text-sidebar-foreground"}`}
-                            />
+                          <div className={cn("flex shrink-0 items-center justify-center", isActive ? "text-primary-foreground" : "text-sidebar-foreground")}>
+                            <item.icon strokeWidth={isActive ? 2.5 : 2} className="size-5" />
                           </div>
-                          <span className={`truncate text-sm ${
-                            isActive ? "text-white font-semibold" : "text-sidebar-foreground"
-                          }`}>
+                          <span className={cn("truncate text-sm", isActive ? "text-primary-foreground font-semibold" : "text-sidebar-foreground")}>
                             {item.title}
                           </span>
                         </div>
                         {item.badge && (
                           <Badge
                             variant="secondary"
-                            className={`ml-auto h-5 min-w-5 px-1.5 text-[10px] font-semibold border-0 ${
+                            className={cn(
+                              "ml-auto h-5 min-w-5 px-1.5 text-[10px] font-semibold border-0",
                               isActive
-                                ? "bg-white/20 text-white"
-                                : "bg-white/10 text-sidebar-foreground"
-                            }`}
+                                ? "bg-primary-foreground/20 text-primary-foreground"
+                                : "bg-sidebar-accent text-sidebar-foreground"
+                            )}
                           >
                             {item.badge}
                           </Badge>
@@ -206,7 +186,7 @@ export function SidebarComponent() {
 
   return (
     <Sidebar collapsible="icon" className={cn("border-r-0 bg-sidebar")}>
-      <SidebarHeader className="px-5 py-4 bg-sidebar/70 border-b border-gray-800">
+      <SidebarHeader className="px-5 py-4 border-b border-sidebar-border">
         <Link href={ROUTES.HOME} className="flex items-center gap-6">
           <img
             src={APP_BRAND.logo}
@@ -216,10 +196,10 @@ export function SidebarComponent() {
             className="object-contain flex-shrink-0"
           />
           <div className="flex flex-col">
-            <span className="font-bold text-white text-xl">
+            <span className="font-bold text-sidebar-foreground text-xl">
               {APP_BRAND.name}
             </span>
-            <span className="text-xs text-primary/70">{APP_BRAND.tagline}</span>
+            <span className="text-xs text-primary">{APP_BRAND.tagline}</span>
           </div>
         </Link>
       </SidebarHeader>
@@ -229,7 +209,6 @@ export function SidebarComponent() {
           <SidebarMenuSkeleton />
         ) : (
         filteredItems.map((item) => {
-          // If it's a group with items, render as collapsible group
           if (isSidebarGroup(item)) {
             return (
               <CollapsibleSidebarGroup
@@ -239,7 +218,6 @@ export function SidebarComponent() {
               />
             );
           }
-          // Otherwise, render as standalone menu item
           return (
             <SidebarGroup key={item.title}>
               <SidebarGroupContent className={isSidebarDisabled ? "cursor-not-allowed" : ""}>
@@ -258,7 +236,7 @@ export function SidebarComponent() {
           <SidebarMenuItem>
             <SidebarMenuButton
               onClick={() => signOut({ callbackUrl: ROUTES.LOGIN })}
-              className="rounded-lg text-sidebar-foreground hover:text-red-400 hover:bg-red-500/10 w-full justify-start px-4 h-12 transition-colors"
+              className="rounded-lg text-sidebar-foreground hover:text-red-500 hover:bg-red-500/10 w-full justify-start px-4 h-12 transition-colors"
             >
               <div className="flex items-center gap-3">
                 <LogOut strokeWidth={2} className="size-5" />
